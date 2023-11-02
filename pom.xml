@@ -40,7 +40,14 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.bytedeco</groupId>
+			<artifactId>javacv</artifactId>
+			<version>1.5.7</version>
+		</dependency>
+
 	</dependencies>
+
 
 	<build>
 		<plugins>

@@ -1,23 +1,18 @@
 package streamSpring.restcontrollers;
 
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpHeaders;
+
+
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import streamSpring.dto.request.VideoRequest;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
+import streamSpring.models.UrlList;
+
+
+
 import java.io.*;
-import java.net.MalformedURLException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -36,7 +31,7 @@ public class VideoRestcontroller {
         try {
             // Récupérez le fichier téléchargé et enregistrez-le localement
             byte[] bytes = file.getBytes();
-            String fileName = "C:\\Users\\flnoel\\Desktop\\Test Developpement\\" + file.getOriginalFilename();
+            String fileName = UrlList.getUrlVideoFile() + file.getOriginalFilename();
             FileOutputStream stream = new FileOutputStream(fileName);
             stream.write(bytes);
             stream.close();
@@ -46,32 +41,43 @@ public class VideoRestcontroller {
         }
 
     }
-    @PostMapping("/uploadImage")
-    @ResponseStatus(HttpStatus.CREATED)
-    public String uploadImage(@RequestParam("file") MultipartFile fileMultipart) {
-        String status = "faild to upload image";
 
+
+    @GetMapping("/captureImage")
+    public String saveImage(){
         try {
+            String imgName = "hero"+".png";
+            String videoName="hero.webm";
+            String videoUrl = UrlList.getUrlVideoFile()+videoName; // Remplacez par l'URL de votre vidéo
+            String outputPath = UrlList.getUrlImageFile()+ imgName; // Le chemin de sortie de l'image capturée
 
-            BufferedImage image = ImageIO.read(fileMultipart.getInputStream());
-            String filepath = "C:\\Users\\flnoel\\Desktop\\Test Developpement\\" + fileMultipart.getName();
-            File outputFile = new File(filepath);
-            ImageIO.write(image, "jpg", outputFile);
-            // Récupérez le fichier téléchargé et enregistrez-le localement
-            System.out.println("L'image a été sauvegardée avec succès dans : " + filepath);
-            status = ("L'image a été sauvegardée avec succès dans : " + filepath);
-        }
-
-
-        catch (IOException e) {
+            captureImage(videoUrl, outputPath);
+            System.out.println("Image capturée avec succès à  x secondes de la vidéo.");
+            return outputPath;
+        } catch (Exception e) {
             e.printStackTrace();
-            System.err.println("Erreur lors de la sauvegarde de l'image.");
+            return "faild to capture the img";
         }
-        return status;
-
     }
 
+    public void captureImage(String videoUrl, String outputPath) throws IOException, InterruptedException {
+        // Chemin vers l'exécutable FFmpeg
+        String ffmpegPath = "C:\\PATH_Programs\\ffmpeg.exe"; // Remplacez par le chemin de l'exécutable FFmpeg sur votre système
+        String time = "5";
+        // Commande FFmpeg pour capturer une image à "time" secondes
+        String[] cmd = { ffmpegPath, "-i", videoUrl, "-ss", time, "-vframes", "1", outputPath };
+
+        // Exécute la commande FFmpeg
+        ProcessBuilder processBuilder = new ProcessBuilder(cmd);
+        Process process = processBuilder.start();
+
+        // Attendez que la commande se termine
+        process.waitFor();
     }
+
+
+
+}
 
 
 
