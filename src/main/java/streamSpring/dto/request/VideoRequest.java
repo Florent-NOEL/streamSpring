@@ -1,29 +1,31 @@
 package streamSpring.dto.request;
 
+import java.util.List;
+
 public class VideoRequest {
-    String path;
-    String type;
+    String title;
+    List<String> GenreEntitieId;
     public VideoRequest() {
     }
 
-    public VideoRequest(String path, String type) {
-        this.path = path;
-        this.type = type;
+    public VideoRequest(String title, List<String> genreEntitieId) {
+        this.title = title;
+        GenreEntitieId = genreEntitieId;
     }
 
-    public String getPath() {
-        return path;
+    public String getTitle() {
+        return title;
     }
 
-    public void setPath(String path) {
-        this.path = path;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
-    public String getType() {
-        return type;
+    public List<String> getGenreEntitieId() {
+        return GenreEntitieId;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setGenreEntitieId(List<String> genreEntitieId) {
+        GenreEntitieId = genreEntitieId;
     }
 }
