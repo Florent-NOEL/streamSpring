@@ -16,16 +16,20 @@ public class VideoGenreIdService {
     @Autowired
     VideoGenreIdRepository videoGenreIdRepository;
 
-    List<VideoGenreId> findByGenre(GenreEntitie genreEntitie){
+    public List<VideoGenreId> findByGenre(GenreEntitie genreEntitie){
     if ((genreEntitie.getName() == null) || (genreEntitie.getName().isBlank()) ){
         throw new GenreException("Genre entitie is blanck");
     }
        return videoGenreIdRepository.findByGenreEntitie(genreEntitie);
     }
-    List<VideoGenreId> findByVideo(VideoEntitie videoEntitie){
+    public List<VideoGenreId> findByVideo(VideoEntitie videoEntitie){
         if((videoEntitie.getTitle() == null) || (videoEntitie.getTitle().isBlank())){
             throw new VideoException("video title is blank");
         }
         return videoGenreIdRepository.findByVideoEntitie(videoEntitie);
+    }
+
+    public VideoGenreId create(VideoGenreId videoGenreId){
+        return videoGenreIdRepository.save(videoGenreId);
     }
 }

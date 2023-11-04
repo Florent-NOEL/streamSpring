@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import streamSpring.entities.GenreEntitie;
 import streamSpring.entities.VideoEntitie;
 import streamSpring.entities.VideoGenreId;
+import streamSpring.exceptions.GenreException;
 import streamSpring.exceptions.VideoException;
 import streamSpring.repository.GenreRepository;
 import streamSpring.repository.VideoGenreIdRepository;
@@ -29,6 +30,10 @@ public class GenreService {
         List<VideoGenreId> videoGenreIds = videoGenreIdRepository.findByVideoEntitie(videoEntitie);
         List<GenreEntitie> genreEntities = videoGenreIds.stream().map(VideoGenreId::getGenreEntitie).collect(Collectors.toList());
         return genreEntities;
+    }
+
+    public GenreEntitie findById(String id){
+        return genreRepository.findById(id).orElseThrow(()-> new GenreException("genre id null"));
     }
 
 

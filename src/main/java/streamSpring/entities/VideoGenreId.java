@@ -20,6 +20,11 @@ public class VideoGenreId {
     public VideoGenreId() {
     }
 
+    public VideoGenreId(VideoEntitie videoEntitie, GenreEntitie genreEntitie) {
+        this.videoEntitie = videoEntitie;
+        this.genreEntitie = genreEntitie;
+    }
+
     public Long getId() {
         return id;
     }

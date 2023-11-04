@@ -2,30 +2,69 @@ package streamSpring.restcontrollers;
 
 
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import streamSpring.dto.request.ImageCaptureRequest;
+import streamSpring.dto.request.VideoRequest;
+import streamSpring.entities.GenreEntitie;
+import streamSpring.entities.VideoEntitie;
+import streamSpring.entities.VideoGenreId;
+import streamSpring.exceptions.VideoException;
 import streamSpring.models.UrlList;
-
+import streamSpring.services.GenreService;
+import streamSpring.services.VideoGenreIdService;
+import streamSpring.services.VideoService;
 
 
 import java.io.*;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 
 @RestController
 @CrossOrigin(origins = "*")
 @RequestMapping("/api/video")
 public class VideoRestcontroller {
+    @Autowired
+    VideoService videoService;
+    @Autowired
+    GenreService genreService;
+    @Autowired
+    VideoGenreIdService videoGenreIdService;
     @GetMapping("/test")
     public String testFuction() {
         System.out.println("hello");
         return "hello";
     }
 
+@PostMapping("/create")
+@ResponseStatus(HttpStatus.CREATED)
+public String createVideo(@RequestBody VideoRequest videoRequest){
+    if (videoRequest.getTitle().isBlank()){
+        throw new VideoException("la video n'a pas de titre");
+    }
+    convertVideoRequestToEntity(videoRequest);
+    return "la video est créer avec succes";
+}
+
+public VideoEntitie convertVideoRequestToEntity(VideoRequest videoRequest){
+    VideoEntitie videoEntitie = new VideoEntitie();
+    videoEntitie.setTitle(videoRequest.getTitle());
+    videoService.updateVideo(videoEntitie);
+    if (!videoRequest.getGenreEntitieId().isEmpty()){
+        List<VideoGenreId> videoGenreIds = videoRequest.getGenreEntitieId().stream().map((s) -> {
+            GenreEntitie genreEntitie = genreService.findById(s);
+            return  videoGenreIdService.create(new VideoGenreId(videoEntitie,genreEntitie));
+        }).collect(Collectors.toList());
+        videoEntitie.setVideoGenreIds(videoGenreIds);
+    }
+    return videoEntitie;
+}
 
     @PostMapping("/uploadVideo")
     @ResponseStatus(HttpStatus.CREATED)

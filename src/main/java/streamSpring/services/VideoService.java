@@ -38,4 +38,18 @@ public class VideoService {
         return genreEntities;
     }
 
+    public  VideoEntitie createVideo(VideoEntitie videoEntitie){
+        if (videoRepository.existsById(videoEntitie.getTitle())){
+            throw new VideoException("Une vidéo existe déja sous ce titre");
+        }
+        return videoRepository.save(videoEntitie);
+    }
+
+    public  VideoEntitie updateVideo(VideoEntitie videoEntitie){
+        if (videoEntitie.getTitle().isBlank()){
+            throw new VideoException("Une vidéo existe déja sous ce titre");
+        }
+        return videoRepository.save(videoEntitie);
+    }
+
 }
