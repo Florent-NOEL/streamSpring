@@ -45,7 +45,7 @@ public class VideoRestcontroller {
 @PostMapping("/create")
 @ResponseStatus(HttpStatus.CREATED)
 public String createVideo(@RequestBody VideoRequest videoRequest){
-    if (videoRequest.getTitle().isBlank()){
+    if (videoRequest.getTitle() ==null || videoRequest.getTitle().isBlank()){
         throw new VideoException("la video n'a pas de titre");
     }
     convertVideoRequestToEntity(videoRequest);
@@ -56,7 +56,7 @@ public VideoEntitie convertVideoRequestToEntity(VideoRequest videoRequest){
     VideoEntitie videoEntitie = new VideoEntitie();
     videoEntitie.setTitle(videoRequest.getTitle());
     videoService.updateVideo(videoEntitie);
-    if (!videoRequest.getGenreEntitieId().isEmpty()){
+    if (videoRequest.getGenreEntitieId()!=null){
         List<VideoGenreId> videoGenreIds = videoRequest.getGenreEntitieId().stream().map((s) -> {
             GenreEntitie genreEntitie = genreService.findById(s);
             return  videoGenreIdService.create(new VideoGenreId(videoEntitie,genreEntitie));
