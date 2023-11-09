@@ -2,7 +2,10 @@ package streamSpring.restcontrollers;
 
 
 
+import io.swagger.v3.core.util.Json;
+import org.opencv.video.Video;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import streamSpring.dto.request.ImageCaptureRequest;
 import streamSpring.dto.request.VideoRequest;
+import streamSpring.dto.response.VideoResponse;
 import streamSpring.entities.GenreEntitie;
 import streamSpring.entities.VideoEntitie;
 import streamSpring.entities.VideoGenreId;
@@ -41,6 +45,11 @@ public class VideoRestcontroller {
         System.out.println("hello");
         return "hello";
     }
+    @GetMapping("/title/{video_title}")
+    public VideoResponse findVideoByTitle(@PathVariable("video_title") String videoTitle){
+       VideoEntitie videoEntitie = videoService.findByNom(videoTitle);
+       return new VideoResponse(videoEntitie);
+    }
 
 @PostMapping("/create")
 @ResponseStatus(HttpStatus.CREATED)
@@ -55,6 +64,10 @@ public String createVideo(@RequestBody VideoRequest videoRequest){
 public VideoEntitie convertVideoRequestToEntity(VideoRequest videoRequest){
     VideoEntitie videoEntitie = new VideoEntitie();
     videoEntitie.setTitle(videoRequest.getTitle());
+    videoEntitie.setType(videoRequest.getType());
+    if(videoEntitie.getType().contains("matroska")){
+        videoEntitie.setType("video/mkv");
+    }
     videoService.updateVideo(videoEntitie);
     if (videoRequest.getGenreEntitieId()!=null){
         List<VideoGenreId> videoGenreIds = videoRequest.getGenreEntitieId().stream().map((s) -> {
@@ -82,6 +95,7 @@ public VideoEntitie convertVideoRequestToEntity(VideoRequest videoRequest){
         }
 
     }
+
 
 
     @PostMapping ("/captureImage")
@@ -120,9 +134,16 @@ public VideoEntitie convertVideoRequestToEntity(VideoRequest videoRequest){
         Process process = processBuilder.start();
 
         // Attendez que la commande se termine
-        process.waitFor(3, TimeUnit.SECONDS);
+        process.waitFor(50, TimeUnit.SECONDS);
         process.destroy();
         System.out.println("process end");
+    }
+
+
+    @GetMapping("/video_page{num}+{items}")
+    public List<VideoResponse> findByPage(@PathVariable Integer num, @PathVariable Integer items){
+        List<VideoResponse> videoResponses = videoService.findAllByPage(num,items).map(VideoResponse::new).stream().collect(Collectors.toList());
+        return  videoResponses;
     }
 
 

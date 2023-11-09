@@ -1,9 +1,6 @@
 package streamSpring.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.util.List;
 import java.util.Objects;
@@ -13,14 +10,21 @@ import java.util.Objects;
 public class VideoEntitie {
     @Id
     String title;
+    @Column(name = "type")
+    String type;
     @OneToMany(mappedBy = "videoEntitie")
     List<VideoGenreId>  videoGenreIds;
 
     public VideoEntitie() {
     }
 
-    public VideoEntitie(String title, List<VideoGenreId> videoGenreIds) {
+    public VideoEntitie(String title) {
         this.title = title;
+    }
+
+    public VideoEntitie(String title, String type, List<VideoGenreId> videoGenreIds) {
+        this.title = title;
+        this.type = type;
         this.videoGenreIds = videoGenreIds;
     }
 
@@ -30,6 +34,14 @@ public class VideoEntitie {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public List<VideoGenreId> getVideoGenreIds() {

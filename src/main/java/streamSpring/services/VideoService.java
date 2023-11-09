@@ -1,7 +1,9 @@
 package streamSpring.services;
 
-import org.opencv.video.Video;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import streamSpring.entities.GenreEntitie;
 import streamSpring.entities.VideoEntitie;
@@ -9,6 +11,7 @@ import streamSpring.entities.VideoGenreId;
 import streamSpring.exceptions.VideoException;
 import streamSpring.repository.VideoGenreIdRepository;
 import streamSpring.repository.VideoRepository;
+
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,6 +53,10 @@ public class VideoService {
             throw new VideoException("Une vidéo existe déja sous ce titre");
         }
         return videoRepository.save(videoEntitie);
+    }
+    public Page<VideoEntitie> findAllByPage(Integer numPage, Integer videoParPage){
+        PageRequest pageRequest = PageRequest.of(numPage, videoParPage);
+        return videoRepository.findAll(pageRequest);
     }
 
 }
