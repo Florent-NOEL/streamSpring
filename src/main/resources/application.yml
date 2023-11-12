@@ -13,8 +13,8 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
   servlet:
     multipart:
-      max-file-size: 2GB
-      max-request-size: 2GB
+      max-file-size: 4GB
+      max-request-size: 4GB
 server:
   servlet:
     context-path: /stream_spring

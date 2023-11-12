@@ -61,13 +61,16 @@ public String createVideo(@RequestBody VideoRequest videoRequest){
     return "la video est créer avec succes";
 }
 
+
 public VideoEntitie convertVideoRequestToEntity(VideoRequest videoRequest){
-    VideoEntitie videoEntitie = new VideoEntitie();
+        VideoEntitie videoEntitie = new VideoEntitie();
     videoEntitie.setTitle(videoRequest.getTitle());
     videoEntitie.setType(videoRequest.getType());
-    if(videoEntitie.getType().contains("matroska")){
-        videoEntitie.setType("video/mkv");
+    if(videoEntitie.getType().contains("matroska")||videoEntitie.getType().contains(".avi")){
+        videoEntitie.setType("video/mp4");
+        videoEntitie.setTitle(videoRequest.getTitle()+"to.mp4");
     }
+
     videoService.updateVideo(videoEntitie);
     if (videoRequest.getGenreEntitieId()!=null){
         List<VideoGenreId> videoGenreIds = videoRequest.getGenreEntitieId().stream().map((s) -> {
@@ -82,16 +85,24 @@ public VideoEntitie convertVideoRequestToEntity(VideoRequest videoRequest){
     @PostMapping("/uploadVideo")
     @ResponseStatus(HttpStatus.CREATED)
     public String uploadVideo(@RequestParam("file") MultipartFile file) {
+        //everything work
         try {
             // Récupérez le fichier téléchargé et enregistrez-le localement
             byte[] bytes = file.getBytes();
+
             String fileName = UrlList.getUrlVideoFile() + file.getOriginalFilename();
             FileOutputStream stream = new FileOutputStream(fileName);
             stream.write(bytes);
             stream.close();
+            System.out.println(file.getOriginalFilename());
+            if(file.getOriginalFilename().contains(".mkv") || file.getOriginalFilename().contains("avi")){
+                convertToMp4(file.getOriginalFilename());
+            };
             return fileName;
         } catch (IOException e) {
             return "Erreur lors du téléchargement du fichier vidéo.";
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
 
     }
@@ -107,8 +118,15 @@ public VideoEntitie convertVideoRequestToEntity(VideoRequest videoRequest){
             System.out.println(videoName);
             //video name doit contenir le type .mp4 ...
             String imgName = videoName+"_Image"+".png";
+            if(videoName.contains(".avi")||videoName.contains(".mkv")){
+                imgName = videoName+"to.mp4"+"_Image"+".png";
+            }
             System.out.println(imgName);
             String videoUrl = UrlList.getUrlVideoFile()+videoName; // Remplacez par l'URL de votre vidéo
+            if(videoName.contains(".avi")||videoName.contains(".mkv")){
+                videoUrl = videoUrl +"to.mp4";
+                System.out.println("video Url"+videoUrl);
+            }
             String outputPath = UrlList.getUrlImageFile()+ imgName; // Le chemin de sortie de l'image capturée
             File imageFileExist = new File(outputPath);
             if (imageFileExist.exists() && imageFileExist.isFile()) {
@@ -122,6 +140,8 @@ public VideoEntitie convertVideoRequestToEntity(VideoRequest videoRequest){
             return "faild to capture the img";
         }
     }
+
+
 
     public void captureImage(String videoUrl, String outputPath, String timeCapture) throws IOException, InterruptedException {
         // Chemin vers l'exécutable FFmpeg
@@ -138,6 +158,58 @@ public VideoEntitie convertVideoRequestToEntity(VideoRequest videoRequest){
         process.destroy();
         System.out.println("process end");
     }
+@GetMapping("/convert_{videoName}")
+    public String convertToMp4(@PathVariable("videoName") String videoName) throws IOException, InterruptedException {
+    String videoUrl = UrlList.getUrlVideoFile(); // Remplacez par l'URL de votre vidéo
+
+    convertMKVtoMP4(videoName, videoUrl);
+        return "down";
+    }
+
+    public void convertMKVtoMP4(String videoName, String videoUrl) throws IOException, InterruptedException {
+
+        try {
+            String ffmpeg = "ffmpeg -i "+videoName+" -c copy " + videoName+ "to.mp4";
+            String[] command = new String[4];
+            command[0] = "powershell.exe";
+            command[1] = " -Command ";
+            command[2] = " cd "+videoUrl+";";
+            command[3] = ffmpeg;
+
+           // String[] command = {"C:\\Program Files\\Git\\git-bash.exe","-i"," cd /Documents/wb/videoFile "," mkdir test "};
+
+            // Create the process builder
+            ProcessBuilder processBuilder = new ProcessBuilder(command);
+
+            // Redirect error stream to output stream
+            processBuilder.redirectErrorStream(true);
+
+            // Start the process
+            Process process = processBuilder.start();
+
+            // Read the output of the command
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+
+            // Wait for the command to complete
+            int exitCode = process.waitFor();
+
+            // Print the exit code
+            System.out.println("Exit Code: " + exitCode);
+            process.destroy();
+            File deletMkvFile = new File(videoUrl+videoName);
+            if (deletMkvFile.exists() && deletMkvFile.isFile()) {
+                deletMkvFile.delete(); // Supprime le fichier s'il existe
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+
 
 
     @GetMapping("/video_page{num}+{items}")
