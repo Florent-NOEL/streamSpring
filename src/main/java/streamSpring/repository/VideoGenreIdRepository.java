@@ -11,4 +11,5 @@ public interface VideoGenreIdRepository extends JpaRepository<VideoGenreId, Long
     List<VideoGenreId> findByVideoEntitie(VideoEntitie videoEntitie);
     List<VideoGenreId> findByGenreEntitie(GenreEntitie genreEntitie);
 
+
 }

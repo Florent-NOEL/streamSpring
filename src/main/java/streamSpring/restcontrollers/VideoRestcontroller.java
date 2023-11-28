@@ -2,10 +2,8 @@ package streamSpring.restcontrollers;
 
 
 
-import io.swagger.v3.core.util.Json;
-import org.opencv.video.Video;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +15,7 @@ import streamSpring.dto.response.VideoResponse;
 import streamSpring.entities.GenreEntitie;
 import streamSpring.entities.VideoEntitie;
 import streamSpring.entities.VideoGenreId;
+import streamSpring.exceptions.GenreException;
 import streamSpring.exceptions.VideoException;
 import streamSpring.models.UrlList;
 import streamSpring.services.GenreService;
@@ -218,6 +217,13 @@ public VideoEntitie convertVideoRequestToEntity(VideoRequest videoRequest){
         return  videoResponses;
     }
 
+    @GetMapping("/find-by-genre/{genre}")
+    public List<VideoResponse> findByGenre(@PathVariable String genre){
+        if(genre == null || genre.isBlank()){
+            throw new GenreException("requested genre is null");
+        }
+        return videoService.findAllVideoByGenre(genre);
+    }
 
 
 }

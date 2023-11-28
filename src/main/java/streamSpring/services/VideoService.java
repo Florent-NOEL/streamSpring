@@ -5,10 +5,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import streamSpring.dto.response.VideoResponse;
 import streamSpring.entities.GenreEntitie;
 import streamSpring.entities.VideoEntitie;
 import streamSpring.entities.VideoGenreId;
+import streamSpring.exceptions.GenreException;
 import streamSpring.exceptions.VideoException;
+import streamSpring.repository.GenreRepository;
 import streamSpring.repository.VideoGenreIdRepository;
 import streamSpring.repository.VideoRepository;
 
@@ -22,6 +25,10 @@ public class VideoService {
     VideoRepository videoRepository;
     @Autowired
     VideoGenreIdRepository videoGenreIdRepository;
+    @Autowired
+    VideoGenreIdService videoGenreIdService;
+    @Autowired
+    GenreRepository genreRepository;
 
     public List<VideoEntitie> findAll(){
        return videoRepository.findAll();
@@ -57,6 +64,15 @@ public class VideoService {
     public Page<VideoEntitie> findAllByPage(Integer numPage, Integer videoParPage){
         PageRequest pageRequest = PageRequest.of(numPage, videoParPage);
         return videoRepository.findAll(pageRequest);
+    }
+
+    public List<VideoResponse> findAllVideoByGenre(String genreString){
+        GenreEntitie genreEntitie = genreRepository.findById(genreString).orElseThrow(() ->
+                new GenreException("genre non trouvé"));
+        List<VideoGenreId> videoGenreIds = videoGenreIdService.findByGenre(genreEntitie);
+        List<VideoEntitie> videoEntities = videoGenreIds.stream().map(VideoGenreId::getVideoEntitie).toList();
+        List<VideoResponse> videoResponses = videoEntities.stream().map(VideoResponse::new).toList();
+        return videoResponses;
     }
 
 }
